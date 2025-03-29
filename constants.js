@@ -1,0 +1,11 @@
+globalThis.MessageType = {
+    SELECTOR: "SELECTOR",
+    IMAGE_CLICKED: "IMAGE_CLICKED",
+    END_RESPONSE: "END_RESPONSE",
+    ERROR: "ERROR"
+};
+globalThis.Status = {
+    SUCCESS: "SUCCESS",
+    FATAL_ERROR: "FATAL_ERROR",
+    FATAL_UNKNOWN_ERROR: "FATAL_UNKNOWN_ERROR"
+}
