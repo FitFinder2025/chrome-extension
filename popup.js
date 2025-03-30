@@ -48,31 +48,32 @@ async function getImages() {
     const base64Image = canvas.toDataURL('image/png');
 
     alert("Trying...");
-    fetch("http://localhost:5000/search/ext", {
+    fetch("http://localhost:5000/search", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            img: base64Image
+            query_image: base64Image
         })
     })
     .then((response) => {
-        return response.text();
+        return response.json();
     })
     .then((response) => {
-        alert(response);
+        url = "http://localhost:5000/?id=";
         if (!response.success) {
             alert("Failure: API exception: " + JSON.stringify(response));
+            chrome.tabs.create({url});
             return;
         }
         
-        if (!response.token) {
-            alert("Failure: No token in response from API: " + JSON.stringify(response));
+        if (!response.id) {
+            alert("Failure: No id in response from API: " + JSON.stringify(response));
             return;
         }   
 
-        url = "http://localhost:5000/?token=" + response.token;
+        url = url + response.id;
         chrome.tabs.create({url});
     })
     .catch(error => {
