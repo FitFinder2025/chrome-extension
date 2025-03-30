@@ -1,13 +1,89 @@
-document.getElementById("searchMode").onclick = enterSearchMode;
+document.getElementById("findImages").onclick = getImages;
 
-async function enterSearchMode() {
+async function getImages() {
+    const [tab] = await chrome.tabs.query(
+        { active: true, lastFocusedWindow: true }
+    );
+    
+    const response = await chrome.tabs.sendMessage(tab.id, 
+        { type: "GET_IMAGES" }
+    );
 
-    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true});
-    const response = await chrome.tabs.sendMessage(tab.id, {type: "SELECTOR", selector: true});
     if (response === undefined) {
-        alert("No response");
+        alert("ERROR (ext): No response given");
         return;
     }
-    alert("Response: " + response);
-    document.getElementById("title").title = response;
-}   
+
+    const container = document.getElementById("image-container");
+
+    response.images.forEach(src => {
+        const imgElement = document.createElement("img");
+        imgElement.src = src;
+        imgElement.alt = 'Image from ' + response.location;
+        imgElement.onclick = function() {
+            selectImage(imgElement);
+        };
+        
+        const listItem = document.createElement("div");
+        listItem.classList.add("image-item");
+        listItem.appendChild(imgElement);
+        container.appendChild(listItem);
+    })
+
+}
+  
+  function callApi(image) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    
+    canvas.width = image.width;
+    canvas.height = image.height;
+    context.drawImage(image, 0, 0);
+
+    const base64Image = canvas.toDataURL('image/png');
+
+    alert("Trying...");
+    fetch("http://localhost:5000/search/ext", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            img: base64Image
+        })
+    })
+    .then((response) => {
+        return response.text();
+    })
+    .then((response) => {
+        alert(response);
+        if (!response.success) {
+            alert("Failure: API exception: " + JSON.stringify(response));
+            return;
+        }
+        
+        if (!response.token) {
+            alert("Failure: No token in response from API: " + JSON.stringify(response));
+            return;
+        }   
+
+        url = "http://localhost:5000/?token=" + response.token;
+        chrome.tabs.create({url});
+    })
+    .catch(error => {
+        if (error.name === 'AbortError') {
+            alert("Failure: request timed out: " + error);
+            return;
+        }
+        alert("Failure: " + error);
+    })
+  }
+
+function selectImage(image) {
+    this.callApi(image);
+}

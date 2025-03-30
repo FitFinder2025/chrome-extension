@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Extension Popup</title>
+    <style type="text/css">
+        body {
+            min-width: 600px;
+            max-width: 100%;
+            position: relative;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body style="background-color: rgb(216 228 238);">
-    <div id="title">
-        Hello World
-    </div>
-    <input id="searchMode" type="button" value="Enter search mode" />
+    <h1>Fit Finder Interactor</h1>
+    <div id="image-container" class="image-list"></div>
+    <button id="findImages">Find Images on Page</button>
     <script src="popup.js"></script>
 
 </body>
