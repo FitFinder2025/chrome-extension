@@ -1,12 +1,11 @@
 async function fetchBase64(url) {
     const response = await fetch(url);
-    const blob = await response.blob;
 
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
         reader.onerror = () => reject(new Error("Failed to read image"));
-        reader.readAsDataURL(blob);
+        reader.readAsDataURL(response.blob);
     })
 }
 
